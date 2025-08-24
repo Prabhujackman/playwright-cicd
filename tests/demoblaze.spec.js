@@ -28,8 +28,8 @@ test('test', async ({ page }) => {
  // await samsung.click({force:true});   // Click on the element
 
 
-  await page.getByRole('cell', { name: '360' }).click();
-  await page.getByRole('heading', { name: '360' }).click();
+  //await page.getByRole('cell', { name: '360' }).click();
+//  await page.getByRole('heading', { name: '360' }).click();
   await page.getByRole('button', { name: 'Place Order' }).click();
   await page.getByText('Total:').click();
   await page.getByRole('heading', { name: 'Place order' }).click();
