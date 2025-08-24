@@ -33,16 +33,16 @@ test('test', async ({ page }) => {
   await page.getByRole('button', { name: 'Place Order' }).click();
   await page.getByText('Total:').click();
   await page.getByRole('heading', { name: 'Place order' }).click();
-  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).click();
-  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).press('CapsLock');
+//  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).click();
+//  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).press('CapsLock');
 
-  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).fill('');
-  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).press('CapsLock');
+//  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).fill('');
+//  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).press('CapsLock');
   
   await page.getByRole('textbox', { name: 'Total: 360 Name:' }).fill('Prabhu');
-  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).press('Tab');
+//  await page.getByRole('textbox', { name: 'Total: 360 Name:' }).press('Tab');
   
-  await page.getByRole('textbox', { name: 'Country:' }).fill('');
+// await page.getByRole('textbox', { name: 'Country:' }).fill('');
   await page.getByRole('textbox', { name: 'Country:' }).click();
   await page.getByRole('textbox', { name: 'Country:' }).fill('india');
   await page.getByRole('textbox', { name: 'Country:' }).press('Tab');
