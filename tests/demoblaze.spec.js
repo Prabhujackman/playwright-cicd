@@ -24,8 +24,8 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'Cart', exact: true }).click();
 //  await page.getByRole('cell', { name: 'Samsung galaxy s6' }).click();
 
-const samsung = page.locator("//a[normalize-space()='Samsung galaxy s6']");// Wait until element is visible and attached
-await samsung.click({force:true});   // Click on the element
+ // const samsung = page.locator("//a[normalize-space()='Samsung galaxy s6']");// Wait until element is visible and attached
+ // await samsung.click({force:true});   // Click on the element
 
 
   await page.getByRole('cell', { name: '360' }).click();
