@@ -22,7 +22,13 @@ test('test', async ({ page }) => {
   });
   await page.getByRole('link', { name: 'Add to cart' }).click();
   await page.getByRole('link', { name: 'Cart', exact: true }).click();
-  await page.getByRole('cell', { name: 'Samsung galaxy s6' }).click();
+//  await page.getByRole('cell', { name: 'Samsung galaxy s6' }).click();
+
+const samsung = page.locator("//a[normalize-space()='Samsung galaxy s6']");
+await samsung.waitFor(); // Wait until element is visible and attached
+await samsung.click();   // Click on the element
+
+
   await page.getByRole('cell', { name: '360' }).click();
   await page.getByRole('heading', { name: '360' }).click();
   await page.getByRole('button', { name: 'Place Order' }).click();
