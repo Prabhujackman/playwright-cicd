@@ -6,7 +6,6 @@ pipeline {
 
   options {
     timestamps()
-    ansiColor('xterm')
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
@@ -22,8 +21,10 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+            ansiColor('xterm') {
         // If your repo is private, configure credentialsId in your job or here
         checkout scm
+            }
       }
     }
 
