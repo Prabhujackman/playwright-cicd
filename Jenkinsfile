@@ -21,10 +21,10 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        ansiColor('xterm') {
-          // If your repo is private, configure credentialsId in your job or here
-          checkout scm
-        }
+            ansiColor('xterm') {
+        // If your repo is private, configure credentialsId in your job or here
+        checkout scm
+            }
       }
     }
 
@@ -46,7 +46,7 @@ pipeline {
          catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
         bat 'npx playwright test'
          }
-          }
+      }
     }
   }
 
@@ -56,7 +56,7 @@ pipeline {
       junit 'test-results/results.xml'
 
       // Publish the Playwright HTML report (HTML Publisher plugin)
-     publishHTML([
+publishHTML([
     allowMissing: true,
     alwaysLinkToLastBuild: true,
     keepAll: true,
