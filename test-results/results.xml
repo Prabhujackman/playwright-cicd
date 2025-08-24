@@ -1,0 +1,6 @@
+<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="16.057589">
+<testsuite name="demoblaze.spec.js" timestamp="2025-08-24T04:42:25.952Z" hostname="chromium" tests="1" failures="0" skipped="0" time="12.696" errors="0">
+<testcase name="test" classname="demoblaze.spec.js" time="12.696">
+</testcase>
+</testsuite>
+</testsuites>
