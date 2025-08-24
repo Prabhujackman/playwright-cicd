@@ -6,7 +6,6 @@ pipeline {
 
   options {
     timestamps()
-    ansiColor('xterm')
     buildDiscarder(logRotator(numToKeepStr: '20'))
   }
 
@@ -22,8 +21,10 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        // If your repo is private, configure credentialsId in your job or here
-        checkout scm
+        ansiColor('xterm') {
+          // If your repo is private, configure credentialsId in your job or here
+          checkout scm
+        }
       }
     }
 
@@ -42,8 +43,10 @@ pipeline {
 
     stage('Run tests') {
       steps {
+         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
         bat 'npx playwright test'
-      }
+         }
+          }
     }
   }
 
@@ -53,14 +56,15 @@ pipeline {
       junit 'test-results/results.xml'
 
       // Publish the Playwright HTML report (HTML Publisher plugin)
-      publishHTML([
-        allowMissing: true,
-        alwaysLinkToLastBuild: true,
-        keepAll: true,
-        reportDir: 'playwright-report',
-        reportFiles: 'index.html',
-        reportName: 'Playwright Report'
-      ])
+     publishHTML([
+    allowMissing: true,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: 'playwright-report',
+    reportFiles: 'index.html',
+    reportName: 'Playwright Report',
+    includes: '**/*'   // 🔑 ensures JS, CSS, assets are copied too
+])
 
       // Keep artifacts for download if needed
       archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results/*.xml, playwright-report/**'
