@@ -54,14 +54,15 @@ pipeline {
       junit 'test-results/results.xml'
 
       // Publish the Playwright HTML report (HTML Publisher plugin)
-      publishHTML([
-        allowMissing: true,
-        alwaysLinkToLastBuild: true,
-        keepAll: true,
-        reportDir: 'playwright-report',
-        reportFiles: 'index.html',
-        reportName: 'Playwright Report'
-      ])
+publishHTML([
+    allowMissing: true,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: 'playwright-report',
+    reportFiles: 'index.html',
+    reportName: 'Playwright Report',
+    includes: '**/*'   // 🔑 ensures JS, CSS, assets are copied too
+])
 
       // Keep artifacts for download if needed
       archiveArtifacts allowEmptyArchive: true, artifacts: 'test-results/*.xml, playwright-report/**'
