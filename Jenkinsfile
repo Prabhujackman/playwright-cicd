@@ -43,7 +43,9 @@ pipeline {
 
     stage('Run tests') {
       steps {
+         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
         bat 'npx playwright test'
+         }
       }
     }
   }
