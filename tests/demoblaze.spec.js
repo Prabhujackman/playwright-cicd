@@ -13,6 +13,7 @@ test('Purchase Samsung Galaxy S6', async ({ page }) => {
 
   // Select product
   await page.getByRole('link', { name: 'Samsung galaxy s6' }).click();
+  console.log("Samsung galaxy s6 is selected");
 
 //  await page.locator("//h2[normalize-space()='Samsung galaxy s6']").click({force:true});
 //  await expect(page.getByRole('heading', { name: 'Samsung galaxy s6' })).toBeVisible(); // ✅ Assert product page loaded
