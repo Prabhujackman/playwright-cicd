@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audit Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6fb;
+      color: #333;
+      display: flex;
+      height: 100vh;
+    }
+  
+    .sidebar {
+      width: 240px;
+      background: linear-gradient(160deg, #667eea, #764ba2);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      color: white;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+    }
+  
+    .brand {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: #ffffff;
+      text-align: center;
+    }
+  
+    .user-info {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+  
+    .user-info .name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+    }
+  
+    .user-info .role {
+      font-size: 0.9rem;
+      color: #e0e0e0;
+    }
+  
+    .nav-link {
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #fff;
+      text-decoration: none;
+      transition: background 0.3s ease;
+      font-weight: 500;
+    }
+  
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(3px);
+    }
+  
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px 40px;
+      background: #f4f6fb;
+    }
+  
+    .section {
+      display: none;
+      animation: fadeIn 0.3s ease-in;
+    }
+  
+    .section.active {
+      display: block;
+    }
+  
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: #222;
+    }
+  
+    .cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+  
+    .card {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      flex: 1;
+      min-width: 180px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .card h2 {
+      font-size: 2.4rem;
+      margin-bottom: 5px;
+    }
+  
+    .card p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+  
+    th,
+    td {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.95rem;
+      border: 1px solid #dcdcf5;
+    }
+  
+    thead {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      color: #fff;
+    }
+  
+    tr:nth-child(even) {
+      background: #f7f7fb;
+    }
+  
+    tr:hover {
+      background: #eef0ff;
+    }
+  
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+  
+    .badge.pending {
+      background: #ffe7d4;
+      color: #d6691e;
+    }
+  
+    .badge.reviewed {
+      background: #d4f7dc;
+      color: #24974a;
+    }
+  
+    .badge.sent-back {
+      background: #ffdede;
+      color: #c00;
+    }
+  
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+  
+    #logs .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+#logs .form-row > div {
+  flex: 1 1 300px; /* Same width for dropdowns & textboxes */
+}
+    label {
+      font-weight: 500;
+      margin-bottom: 5px;
+      display: block;
+    }
+  
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+  
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+  
+    button {
+      padding: 10px 20px;
+      background: #4b4fd4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+  
+    button:hover {
+      background: #3a3db5;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      width: 500px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+  
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+
+    /* Hide main UI until JS decides */
+.sidebar,
+.main {
+  display: none;
+}
+
+#loginContainer {
+  display: none;
+}
+
+/* Fullscreen Centered Container */
+#loginContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+
+  /* Gradient with screenshot colors */
+  background: linear-gradient(135deg, #F8BBD0, #CE93D8, #B39DDB, #FFCCBC, #FFFFFF);
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Smooth background movement */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Glitter Effect */
+#loginContainer::before {
+  content: "";
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 200%; 
+  height: 200%;
+  background-image: radial-gradient(rgba(255,255,255,0.5) 1px, transparent 1px);
+  background-size: 3px 3px;
+  animation: glitterMove 6s linear infinite;
+  opacity: 0.4;
+}
+#loginContainer::before {
+  z-index: 0; /* make sure it's behind */
+}
+
+.login-card {
+  position: relative;
+  z-index: 1; /* bring card above overlay */
+}
+
+@keyframes glitterMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-50%, -50%); }
+}
+
+/* Login Card */
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(15px);
+  padding: 60px 50px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  color: #4A148C;
+}
+
+/* Title */
+.login-card h2 {
+  font-family: 'Pacifico', cursive;
+  font-size: 2.8rem;
+  margin-bottom: 35px;
+  color: #6A1B9A;
+  text-shadow: 0 0 15px rgba(255,192,203,0.9);
+}
+
+/* Inputs */
+.login-card input {
+  width: 100%;
+  padding: 20px;
+  margin: 18px 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.3rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #4A148C;
+  box-shadow: 0 0 8px rgba(186,104,200,0.25);
+  transition: all 0.3s ease;
+}
+
+.login-card input::placeholder {
+  color: rgba(74, 20, 140, 0.6);
+}
+
+.login-card input:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(186,104,200,0.6);
+  transform: scale(1.03);
+}
+
+/* Button */
+.login-card button {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(90deg, #8E24AA, #BA68C8, #FF80AB);
+  background-size: 200% 200%;
+  animation: btnShimmer 3s ease infinite;
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(186,104,200,0.5);
+}
+
+@keyframes btnShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.login-card button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(186,104,200,0.8);
+}
+
+/* Ripple Effect */
+.login-card button::after {
+  content: "";
+  position: absolute;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  opacity: 0;
+  pointer-events: none;
+}
+#loginContainer::before {
+  pointer-events: none; /* prevent blocking interactions */
+}
+
+.login-card button:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(20); }
+}
+
+/* Links */
+.login-card .links {
+  margin-top: 25px;
+  font-size: 1.1rem;
+}
+
+.login-card .links a {
+  color: #8E24AA;
+  text-decoration: none;
+}
+
+.login-card .links a:hover {
+  text-decoration: underline;
+}
+.chart-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+#dashboardCards {
+  display: flex;
+  justify-content: center; /* center card in space */
+  margin-bottom: 20px;
+}
+
+#dashboardCards .card {
+  flex: 0 0 450px; /* fixed width for the card */
+  padding: 20px;
+  background: linear-gradient(to right, #6a85b6, #8c52ff);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  /* Center content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* horizontal center */
+  justify-content: center; /* vertical center */
+  text-align: center;
+}
+:root {
+      --chart-color-1: #8c52ff; /* Purple slice */
+      --chart-color-2: #f2f2f2; /* Light gray slice */
+    }
+
+    /* Lead */
+    [data-role="Lead"] {
+      --chart-color-1: #ff9800; /* Orange slice */
+      --chart-color-2: #f2f2f2; /* Light gray slice */
+    }
+
+    /* Manager */
+    [data-role="Manager"] {
+      --chart-color-1: #4caf50; /* Green slice */
+      --chart-color-2: #f2f2f2; /* Light gray slice */
+    }
+    
+    /* ====== New Welcome Message Styling ====== */
+    #welcomeMessage {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 10px 0 30px 0; /* top right bottom left */
+}
+
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+  </style>
+</head>
+<body>
+
+
+<!--new code-->
+
+<div id="loginContainer" style="padding: 40px; width: 100%; text-align: center;">
+  <img src="images/test.png" alt="Logo" class="login-logo">
+
+  <h2 style="font-size: 32px; margin-bottom: 20px;">Login to Audit Pro</h2>
+
+<input type="email" id="email" placeholder="Email" 
+ style="margin: 15px; padding: 15px; width: 320px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc;" /><br />
+
+<input type="password" id="password" placeholder="Password" 
+ style="margin: 15px; padding: 15px; width: 320px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc;" /><br />
+
+<button onclick="login()" 
+ style="padding: 15px 30px; font-size: 20px; background-color: black; color: white; border: none; border-radius: 8px; cursor: pointer;">
+ Login
+</button>
+
+<p id="authStatus" style="margin-top: 20px; font-weight: bold;"></p>
+</div>
+
+
+
+
+
+
+
+  
+  <!--sidebar-->
+
+  <aside class="sidebar">
+
+
+    <div class="brand">🔍 Audit Pro</div>
+    <div class="user-info">
+      <div class="name" id="userName">John Smith</div>
+      <div class="role" id="userRole"> Member</div>
+    </div>
+    <nav>
+      <div class="nav-link active" onclick="switchSection('dashboard', this)">📊 Dashboard</div>
+      <div class="nav-link" id="approvedSubmissionsNav" onclick="switchSection('approvedSubmissions', this)" style="display: none;">
+        ✅ Approved Submission</div>
+      <div class="nav-link" onclick="switchSection('workspace', this)">💼 Workspace</div>
+      <div class="nav-link" onclick="switchSection('reviewhub', this)">🔍 Review Hub</div>
+      <div class="nav-link" onclick="switchSection('audit', this)">📈 Audit & Scoring</div>
+      <div class="nav-link" onclick="switchSection('logs', this)">📝 Logs</div>
+      <div class="nav-link" onclick="switchSection('feedback', this)">💬 Feedback & Meetings</div>
+      <div class="nav-link" onclick="switchSection('users', this)">👥 User Management</div>
+    </nav>
+
+
+    <!-- Spacer to push logout button to bottom -->
+<div style="flex-grow: 1;"></div>
+
+<!-- 🔚 Logout Button at bottom -->
+<button onclick="logout()" style="background: #7f7fd5; color: white; padding: 10px; border: none; border-radius: 6px; cursor: pointer;">
+  🚪 Logout
+</button>
+  <!--logout new-->
+
+  </aside>
+
+
+
+  
+
+
+  <div class="main">
+    <!-- Dashboard -->
+    <section id="dashboard" class="section active">
+      <h1>📊 Dashboard</h1>
+      <h2 id="welcomeMessage" 
+      style="text-align:center; font-size:1.5rem; font-weight:bold; margin-bottom:150px; margin-top:10px;">
+  </h2>
+  
+
+      <div class="cards" id="dashboardCards">
+        <div class="card"><h2>12</h2><p>Submissions This Month</p></div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="dashboardChart" width="320" height="320"></canvas>
+      </div>
+    </section>
+
+
+    <!-- 🔽 Add this exactly here - reviewed submision-->
+    <section id="approvedSubmissions" class="section">
+        <h2>Approved Submissions</h2>
+    <table border="1" cellspacing="0" cellpadding="8" style="width: 100%; border-collapse: collapse;">
+      <thead style="background-color: #f0f0f0;">
+        <tr>
+          <th>Name</th>
+          <th>Project Name</th>
+          <th>Submitted Artifacts</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="approvedSubmissionsBody">
+
+        <tr>
+          <td>Asha Mehta</td>
+          <td>Project Tracker Revamp</td>
+          <td>Designs, Planning Docs</td>
+          <td style="color: green;">Approved</td>
+        </tr>
+        <tr>
+          <td>Vivek Kumar</td>
+          <td>Test Automation Suite</td>
+          <td>Test Cases, Demo Video</td>
+          <td style="color: green;">Approved</td>
+        </tr>
+        <tr>
+          <td>Priya Ramesh</td>
+          <td>CRM Tool Redesign</td>
+          <td>Bug Tracker, Mind Map</td>
+          <td style="color: green;">Approved</td>
+        </tr>
+      </tbody>
+
+    </table>
+  </section>
+
+
+    <!-- QA Workspace -->
+    <section id="workspace" class="section">
+      <h1>💼 QA Workspace</h1>
+      <form onsubmit="submitArtifact(); return false;">
+        <div class="form-row">
+          <div>
+            <label>Test Cases</label>
+            <input type="file" />
+          </div>
+          <div>
+            <label>Bug Tracker</label>
+            <input type="file" />
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div>
+            <label>Mind Map</label>
+            <input type="file" />
+          </div>
+          <div>
+            <label>Project Docs</label>
+            <input type="file" />
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div>
+            <label>Month</label>
+            <input type="month" required />
+          </div>
+          <div>
+            <label>Project</label>
+            <select name="project" required>
+                <option value="">Select Project</option>
+              <option>E-commerce Platform</option>
+              <option>CRM Tool</option>
+              <option>Internal Audit App</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-row full">
+            <div>
+              <label>Reviewer</label>
+              <select name="reviewer" required>
+                <option value="">Select Reviewer</option>
+                <option>George</option>
+                <option>Priya Ramesh</option>
+                <option>Ravi Teja</option>
+              </select>
+            </div>
+          </div>
+          
+        
+        <button type="submit">Submit Artifact</button>
+      </form>
+
+      <h2>Past Submissions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File</th>
+            <th>Project</th>
+            <th>Month</th>
+            <th>Reviewer</th>
+            <th>Status</th>
+            <th>Version</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>test-cases-alpha.xlsx</td>
+            <td>Project Alpha</td>
+            <td>Jan 2024</td>
+            <td>George</td>
+            <td><span class="badge pending">Pending</span></td>
+            <td>v1</td>
+            <td>
+              <button onclick="viewSubmission(this)">View</button>
+            </td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <!-- QA Review Hub -->
+    <section id="reviewhub" class="section">
+      <h1>🔍 QA Review Hub</h1>
+     
+
+<h2 style="margin-top: 40px;">Bug Tracker Review</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Submitted By</th>
+      <th>File</th>
+      <th>Project</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="bugTrackersBody"> <!-- ✅ Add this ID -->
+  </tbody>
+</table>
+
+
+      <div style="margin-top: 30px; display: flex; gap: 15px;">
+        <button onclick="alert('Review submitted successfully!')">✅ Submit Review</button>
+        <button id="submitToAuditorBtn">📤 Submit to Auditor</button>
+    </div>
+    </section>
+    
+<!-- Audit & Scoring -->
+<section id="audit" class="section">
+  <h1>📊 Audit Scores</h1>
+
+  <div class="form-row" style="margin-bottom: 25px;">
+    <div>
+      <label>Select Project:</label>
+      <select id="projectSelect">
+        <option>CRM Tool</option>
+        <option>E-commerce Platform</option>
+        <option>Internal QA Tool</option>
+      </select>
+    </div>
+    <div>
+      <label>Select QA Member:</label>
+      <select id="memberSelect">
+        <option>guru</option>
+        <option>Jaya</option>
+        <option>Jenifer</option>
+      </select>
+    </div>
+  </div>
+
+  <table id="auditTable">
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Target Score</th>
+        <th>Achieved Score</th>
+        <th>Variance</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Dynamic rows inserted here -->
+    </tbody>
+    <tfoot>
+      <tr style="background:#eee; font-weight:bold;">
+        <td>Total</td>
+        <td id="totalTarget">0%</td>
+        <td id="totalAchieved">0%</td>
+        <td id="totalVariance">0%</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div style="margin-top: 20px;">
+    <button id="saveScoresBtn" style="display:none;">💾 Save Scores</button>
+  </div>
+</section>
+
+   
+
+
+<!-- QA Logs -->
+<section id="logs" class="section">
+    <h1>📝 QA Logs</h1>
+  
+    <div class="form-row" style="margin-bottom: 25px;">
+      <div>
+        <label>Select Month:</label>
+        <select id="monthSelect">
+            <option value="July 2024">July 2024</option>
+            <option value="August 2025">August 2025</option>
+        </select>
+      </div>
+      <div>
+        <label>Select Project:</label>
+        <select id="projectSelect">
+          <option>CRM Tool</option>
+        </select>
+      </div>
+      <div>
+        <label>Select QA Member:</label>
+        <select id="qaMemberSelect">
+            <option value="guru">Guru</option>
+            <option value="prathi">Prathi</option>
+          </select>
+      </div>
+    </div>
+  
+    <!-- Inputs -->
+    <div class="form-row" style="display: flex; flex-direction: column; gap: 10px; max-width: 400px;">
+      <label>Test Cases Executed: <input type="number" id="executed" min="0"></label>
+      <label>Test Cases Written: <input type="number" id="written" min="0"></label>
+      <label>Test Cases Updated: <input type="number" id="updated" min="0"></label>
+      <label>Bugs Found: <input type="number" id="bugsFound" min="0"></label>
+      <label>Bugs Retested: <input type="number" id="bugsRetested" min="0"></label>
+    </div>
+  
+    <div style="margin-top: 20px;">
+      <button id="submitQaLogs" style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        ✅ Submit Logs
+      </button>
+    </div>
+  </section>
+
+<!-- Feedback & Meetings -->
+<section id="feedback" class="section">
+    <h1>💬 Feedback</h1>
+    
+    <!-- Read-only view (for Member) -->
+    <div id="readonlyFeedback" style="display: none; margin-top: 15px;">
+      <h3>Your Feedback</h3>
+      <div id="feedbackList">
+        <!-- feedback will load dynamically here -->
+      </div>
+    </div>
+  
+    <!-- Editable form (for Lead/Manager) -->
+    <form id="editableFeedbackForm" style="display:none;">
+      <div class="form-row full">
+        <label>Select QA Team Member</label>
+        <select id="feedbackMember" required>
+          <option value="">Select Team Member</option>
+          <!-- can populate dynamically -->
+          <option value="guru@gmail.com">guru</option>
+        </select>
+      </div>
+  
+      <div class="form-row full">
+        <label>Feedback Type</label>
+        <select id="feedbackType" required>
+          <option value="">Select Feedback Type</option>
+          <option>Monthly Review</option>
+          <option>Peer Review</option>
+          <option>Audit Call</option>
+        </select>
+      </div>
+  
+      <!-- Calendar Modal for scheduling audit -->
+      <div id="calendarModal" style="display: none; padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <h3>Schedule Audit Call</h3>
+        <label>Date: <input type="date" id="auditDate" required /></label><br />
+        <label>Time: <input type="time" id="auditTime" required /></label><br />
+        <label>Email: <input type="email" id="inviteEmail" required /></label><br />
+        <button type="button" onclick="confirmAuditSchedule()">Confirm</button>
+        <button type="button" onclick="closeCalendarModal()">Cancel</button>
+      </div>
+  
+      <div class="form-row full">
+        <label>Feedback</label>
+        <textarea id="feedbackComments" placeholder="Enter detailed feedback..." required></textarea>
+      </div>
+  
+      <div class="form-row full">
+        <label>Rating (1-5)</label>
+        <select id="feedbackRating" required>
+          <option value="1">1 - Poor</option>
+          <option value="2">2 - Fair</option>
+          <option value="3">3 - Good</option>
+          <option value="4">4 - Very Good</option>
+          <option value="5" selected>5 - Excellent</option>
+        </select>
+      </div>
+  
+      <div class="form-row full" style="display: flex; gap: 15px; margin-top: 20px;">
+        <button type="button" onclick="submitFeedback()">✅ Submit Feedback</button>
+        <button type="button" onclick="openCalendarModal()">📅 Schedule Audit Call</button>
+      </div>
+    </form>
+  </section>
+  
+
+
+    <!-- User Management -->
+    <section id="users" class="section">
+      <h1>👥 User Management</h1>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email ID</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+
+      <div style="margin-top: 20px;">
+
+<!-- Add User Modal -->
+<div id="addUserModal" class="modal">
+    <div class="modal-content">
+      <h2>Add New User</h2>
+      <form id="addUserForm">
+        <div style="margin-bottom: 10px;">
+          <label for="newUserName">Name:</label>
+          <input type="text" id="newUserName" required>
+        </div>
+  
+        <div style="margin-bottom: 10px;">
+          <label for="newUserEmail">Email:</label>
+          <input type="email" id="newUserEmail" required>
+        </div>
+  
+        <div style="margin-bottom: 20px;">
+          <label for="newUserRole">Role:</label>
+          <select id="newUserRole" required>
+            <option value="Member">Member</option>
+            <option value="Lead">Lead</option>
+            <option value="Manager">Manager</option>
+          </select>
+        </div>
+  
+        <div style="text-align: right;">
+          <button type="submit">Add User</button>
+          <button type="button" onclick="closeAddUserModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  
+  <button onclick="openAddUserModal()">➕ Add User</button>
+</div>
+    </section>
+  </div>
+
+  <!-- View Submission Modal -->
+  <div id="viewModal" class="modal">
+    <div class="modal-content">
+      <h2>Submission Summary</h2>
+      <p><strong>File:</strong> <span id="viewFile"></span></p>
+      <p><strong>Project:</strong> <span id="viewProject"></span></p>
+      <p><strong>Month:</strong> <span id="viewMonth"></span></p>
+      <p><strong>Reviewer:</strong> <span id="viewReviewer"></span></p>
+      <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+      <p><strong>Version:</strong> <span id="viewVersion"></span></p>
+      <div style="margin-top: 20px; text-align: right;">
+        <button onclick="closeViewModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+function switchSection(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+
+  if (id === 'approvedSubmissions') {
+    populateApprovedSubmissions();
+  }
+
+  // ✅ This line is missing in your code
+  if (id === 'reviewhub') {
+    populateReviewHub();
+  }
+}
+
+
+
+function changeRole(role) {
+  document.getElementById('userRole').textContent = role;
+
+  const reviewHubLink = Array.from(document.querySelectorAll('.nav-link'))
+    .find(link => link.textContent.includes('Review Hub'));
+  const userMgmtLink = Array.from(document.querySelectorAll('.nav-link'))
+    .find(link => link.textContent.includes('User Management'));
+  const workspaceLink = Array.from(document.querySelectorAll('.nav-link'))
+    .find(link => link.textContent.includes('Workspace'));
+  const approvedSubmissionsLink = document.getElementById('approvedSubmissionsNav');
+  const saveBtn = document.getElementById('saveScoresBtn');
+
+  const readonlyFeedback = document.getElementById('readonlyFeedback');
+  const editableForm = document.getElementById('editableFeedbackForm');
+
+  if (role === 'Member') {
+    if (reviewHubLink) reviewHubLink.style.display = 'none';
+    if (userMgmtLink) userMgmtLink.style.display = 'none';
+    if (workspaceLink) workspaceLink.style.display = '';
+    if (approvedSubmissionsLink) approvedSubmissionsLink.style.display = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+
+    readonlyFeedback.style.display = 'block';
+    editableForm.style.display = 'none';
+  } else if (role === 'Lead') {
+    if (reviewHubLink) reviewHubLink.style.display = '';
+    if (userMgmtLink) userMgmtLink.style.display = 'none';
+    if (workspaceLink) workspaceLink.style.display = 'none';
+    if (approvedSubmissionsLink) approvedSubmissionsLink.style.display = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+
+    readonlyFeedback.style.display = 'none';
+    editableForm.style.display = 'block';
+
+    // ✅ THIS LINE is the fix — it refreshes Review Hub
+    populateReviewHub();
+  } else {
+    if (workspaceLink) workspaceLink.style.display = 'none';
+    if (reviewHubLink) reviewHubLink.style.display = 'none';
+    if (userMgmtLink) userMgmtLink.style.display = '';
+    if (approvedSubmissionsLink) approvedSubmissionsLink.style.display = '';
+    if (saveBtn) saveBtn.style.display = 'inline-block';
+
+    readonlyFeedback.style.display = 'none';
+    editableForm.style.display = 'block';
+  }
+
+  updateDashboardCards(role);
+  setupSelectsBasedOnRole(role);
+
+}
+//function getCurrentMonthKey() {
+  //const d = new Date();
+  //return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; // "YYYY-MM"
+//}
+
+function getCurrentMonthKey() {
+  const today = new Date();
+  const month = today.getMonth() + 1; // 0-based
+  const monthStr = month < 10 ? '0' + month : month;
+  return `${today.getFullYear()}-${monthStr}`; // YYYY-MM
+}
+
+let dashboardChartInstance = null;
+
+function updateDashboardCards(role) {
+  const container = document.getElementById('dashboardCards');
+  if (!container) return;
+
+  const monthKey = getCurrentMonthKey();
+  const review = getReviewSubs() || [];
+  const approved = getApproved() || [];
+
+  let cardValue = 0;
+  let cardLabel = '';
+
+  if (role === 'Member') {
+    const my = (currentUserName || '').toLowerCase();
+    cardValue = review.filter(s =>
+      (s.createdMonth || '') === monthKey &&  // ✅ FIX: Use createdMonth instead of month
+      (s.submittedBy || '').toLowerCase() === my
+    ).length;
+    cardLabel = 'Submissions This Month';
+  }
+  else if (role === 'Lead') {
+    cardValue = review.filter(s => s.status === 'Pending').length;
+    cardLabel = 'Pending Reviews';
+  }
+  else if (role === 'Manager') {
+    cardValue = approved.length;
+    cardLabel = 'Approved Submissions';
+  }
+
+  // Update card
+  container.innerHTML = `
+    <div class="card">
+      <h2>${cardValue}</h2>
+      <p>${cardLabel}</p>
+    </div>
+    <canvas id="dashboardChart" style="max-width:300px; margin:auto;"></canvas>
+  `;
+
+  // ✅ Chart colors from CSS
+  const color1 = getComputedStyle(document.documentElement).getPropertyValue('--chart-color-1').trim();
+  const color2 = getComputedStyle(document.documentElement).getPropertyValue('--chart-color-2').trim();
+
+  const ctx = document.getElementById('dashboardChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: [cardLabel, 'Remaining'],
+        datasets: [{
+          data: [cardValue, Math.max(0, 10 - cardValue)], // Example total=10
+          backgroundColor: ['#4caf50', '#8c52ff']
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+}
+
+/*
+function drawDashboardChart(label, value) {
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+
+    // Destroy old chart if it exists
+    if (dashboardChartInstance) {
+        dashboardChartInstance.destroy();
+    }
+
+    dashboardChartInstance = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: [label, 'Remaining'],
+            datasets: [{
+                data: [value, Math.max(0, 100 - value)], // just a visual; adjust as needed
+                backgroundColor: ['#4caf50','#8c52ff'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+    */
+
+//view btn
+    function viewSubmission(button) {
+      const row = button.closest('tr');
+      const cells = row.querySelectorAll('td');
+
+      document.getElementById('viewFile').textContent = cells[0].textContent;
+      document.getElementById('viewProject').textContent = cells[1].textContent;
+      document.getElementById('viewMonth').textContent = cells[2].textContent;
+      document.getElementById('viewReviewer').textContent = cells[3].textContent;
+      document.getElementById('viewStatus').innerHTML = cells[4].innerHTML;
+      document.getElementById('viewVersion').textContent = cells[5].textContent;
+
+      document.getElementById('viewModal').style.display = 'flex';
+    }
+
+    function closeViewModal() {
+      document.getElementById('viewModal').style.display = 'none';
+    }
+
+
+function addToPastSubmissions(sub) {
+  const tbody = document.querySelector('#workspace table tbody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${sub.fileName}</td>
+    <td>${sub.project}</td>
+    <td>${sub.month}</td>
+    <td>${sub.reviewer}</td>
+    <td><span class="badge pending">${sub.status}</span></td>
+    <td>v1</td>
+    <td>
+      <button onclick="viewSubmission(this)">View</button>
+      <button onclick="alert('Edit functionality')">Edit</button>
+    </td>
+  `;
+  tbody.appendChild(row);
+}
+
+// Existing code continues...
+
+
+/* ================================
+   LocalStorage helpers
+================================== */
+const LS_KEYS = {
+  review: 'reviewHubSubmissions',   // Member → Lead
+  approved: 'approvedSubmissions'   // Lead → Manager
+};
+
+function getReviewSubs() {
+  return JSON.parse(localStorage.getItem(LS_KEYS.review)) || [];
+}
+function setReviewSubs(list) {
+  localStorage.setItem(LS_KEYS.review, JSON.stringify(list));
+}
+function getApproved() {
+  return JSON.parse(localStorage.getItem(LS_KEYS.approved)) || [];
+}
+function setApproved(list) {
+  localStorage.setItem(LS_KEYS.approved, JSON.stringify(list));
+}
+
+
+/* ================================
+   Member submits → goes to Review Hub (localStorage)
+================================== */
+function submitArtifact() {
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  const project = document.querySelector('select[name="project"]').value;
+  const month = document.querySelector('input[type="month"]').value;
+  const reviewer = document.querySelector('select[name="reviewer"]').value;
+
+  if (!project || !month || !reviewer) {
+    alert("Please fill out project, month, and reviewer.");
+    return;
+  }
+
+  let filesAdded = 0;
+  let list = getReviewSubs();
+
+  fileInputs.forEach(input => {
+    const file = input.files[0];
+    if (file) {
+        const submission = {
+  id: Date.now().toString(),
+  submittedBy: currentUserName || '',
+  fileName: file.name,
+  project,
+  month,
+  reviewer,
+  status: 'Pending',
+  createdMonth: getCurrentMonthKey()
+};
+
+      list.push(submission);
+      addToPastSubmissions(submission); // your existing helper to render in Past Submissions
+      filesAdded++;
+    }
+  });
+
+  if (filesAdded === 0) {
+    alert("Please attach at least one file.");
+    return;
+  }
+
+  setReviewSubs(list);
+  //updateDashboardCards(window.currentUserRole || document.getElementById('userRole').textContent);
+  updateDashboardCards(currentUserRole); 
+
+  alert(`${filesAdded} artifact(s) submitted!`);
+  populateReviewHub(); // so Lead sees them
+}
+
+/* ================================
+   Lead's Review Hub table
+================================== */
+function populateReviewHub() {
+  const body = document.getElementById('bugTrackersBody');
+  body.innerHTML = '';
+
+  const list = getReviewSubs();
+
+  if (list.length === 0) {
+    body.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center; padding: 16px;">No submissions yet.</td>
+      </tr>`;
+    return;
+  }
+
+  list.forEach(sub => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${sub.submittedBy}</td>
+      <td>${sub.fileName}</td>
+      <td>${sub.project}</td>
+      <td>
+        <select onchange="updateSubmissionStatus('${sub.id}', this.value)">
+          <option ${sub.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option ${sub.status === 'Reviewed' ? 'selected' : ''}>Reviewed</option>
+          <option ${sub.status === 'Send Back' ? 'selected' : ''}>Send Back</option>
+        </select>
+      </td>
+      <td>
+        <button onclick="viewSubmissionFromReviewHub('${sub.id}')">View</button>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+function openCalendarModal() {
+    const modal = document.getElementById('calendarModal');
+    if (modal) {
+        modal.style.display = 'block';
+    }
+}
+
+function closeCalendarModal() {
+    const modal = document.getElementById('calendarModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+function confirmAuditSchedule() {
+    const date = document.getElementById('auditDate').value;
+    const time = document.getElementById('auditTime').value;
+    const email = document.getElementById('inviteEmail').value;
+
+    if (!date || !time || !email) {
+        alert('Please fill in all fields before confirming.');
+        return;
+    }
+
+    // Prepare payload for Make.com webhook
+    const payload = {
+        date: date,
+        time: time,
+        email: email,
+        scheduledBy: currentUserName || 'Unknown'
+    };
+
+    fetch("https://hook.eu2.make.com/sbu9vk25nndl8f9fjdqww58mgon0ad3l", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("✅ Audit meeting scheduled successfully!");
+        } else {
+            alert("❌ Failed to schedule audit.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("❌ An error occurred while scheduling.");
+    })
+    .finally(() => {
+        closeCalendarModal(); // Close modal regardless
+    });
+}
+
+
+function closeCalendarModal() {
+    const modal = document.getElementById('calendarModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+
+
+
+/* ================================
+   Lead changes status in the select
+================================== */
+function updateSubmissionStatus(id, newStatus) {
+    updateDashboardCards(window.currentUserRole || document.getElementById('userRole').textContent);
+
+  const list = getReviewSubs();
+  const idx = list.findIndex(s => s.id === id);
+  if (idx > -1) {
+    list[idx].status = newStatus;
+    setReviewSubs(list);
+  }
+}
+
+
+/* ================================
+   Fill modal from Review Hub row
+================================== */
+function viewSubmissionFromReviewHub(id) {
+  const sub = getReviewSubs().find(s => s.id === id);
+  if (!sub) {
+    alert('Submission not found.');
+    return;
+  }
+
+  document.getElementById('viewFile').textContent = sub.fileName;
+  document.getElementById('viewProject').textContent = sub.project;
+  document.getElementById('viewMonth').textContent = sub.month;
+  document.getElementById('viewReviewer').textContent = sub.reviewer;
+  document.getElementById('viewStatus').innerHTML =
+    `<span class="badge ${sub.status === 'Pending' ? 'pending' : (sub.status === 'Reviewed' ? 'reviewed' : 'sent-back')}">${sub.status}</span>`;
+  document.getElementById('viewVersion').textContent = 'v1';
+
+  document.getElementById('viewModal').style.display = 'flex';
+}
+
+
+/* ================================
+   Lead: move all Reviewed → Approved
+================================== */
+(function wireSubmitToAuditor() {
+  const btn = document.getElementById('submitToAuditorBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', function () {
+    const list = getReviewSubs();
+    const reviewed = list.filter(s => s.status === 'Reviewed');
+
+    if (reviewed.length === 0) {
+      alert('No Reviewed items to send.');
+      return;
+    }
+
+    // Append to Approved
+    const approved = getApproved().concat(reviewed);
+    setApproved(approved);
+    updateDashboardCards(window.currentUserRole || document.getElementById('userRole').textContent);
+
+    // Keep only not reviewed in Review Hub
+    const remaining = list.filter(s => s.status !== 'Reviewed');
+    setReviewSubs(remaining);
+    updateDashboardCards(window.currentUserRole || document.getElementById('userRole').textContent);
+
+    alert('Reviewed artifacts have been moved to Approved Submissions.');
+
+    // Refresh views
+    populateReviewHub();
+    // If Manager is already looking at the Approved tab, refresh it now
+    const approvedTab = document.getElementById('approvedSubmissions');
+    if (approvedTab && approvedTab.classList.contains('active')) {
+      populateApprovedSubmissions();
+    }
+  });
+})();
+/* ================================
+   Manager's Approved Submissions
+================================== */
+function populateApprovedSubmissions() {
+  const body = document.getElementById('approvedSubmissionsBody');
+  if (!body) return;
+
+  body.innerHTML = '';
+  const approvedList = getApproved();
+
+  if (approvedList.length === 0) {
+    body.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding: 16px;">No approved submissions yet.</td>
+      </tr>`;
+    return;
+  }
+
+  approvedList.forEach(sub => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${sub.submittedBy || '-'}</td>
+      <td>${sub.project || '-'}</td>
+      <td>${sub.fileName || '-'}</td>
+      <td style="color: green;">Approved</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+// 🔹 Clear approved submissions on page load
+window.addEventListener('DOMContentLoaded', () => {
+  localStorage.removeItem(LS_KEYS.approved);
+  updateDashboardCards(currentUserRole);
+  // remove old approved data
+});
+
+
+    function logout() {
+  firebase.auth().signOut().then(() => {
+    alert("Logged out successfully.");
+    document.getElementById("loginContainer").style.display = "block";
+    document.querySelector(".sidebar").style.display = "none";
+    document.querySelector(".main").style.display = "none";
+  }).catch(error => {
+    alert("Logout failed: " + error.message);
+  });
+}
+
+
+function openAddUserModal() {
+  document.getElementById("addUserModal").style.display = "flex";
+}
+
+function closeAddUserModal() {
+  document.getElementById("addUserModal").style.display = "none";
+}
+
+
+// ===== Feedback & Meetings =====
+
+// Submit feedback (Lead/Manager)
+async function submitFeedback() {
+  const member = document.getElementById("feedbackMember").value;
+  const type = document.getElementById("feedbackType").value;
+  const rating = document.getElementById("feedbackRating").value;
+  const comments = document.getElementById("feedbackComments").value;
+
+  if (!member || !type || !comments) {
+    alert("⚠️ Please fill all fields.");
+    return;
+  }
+
+  try {
+    await db.collection("feedback").add({
+      member,
+      type,
+      rating,
+      comments,
+      submittedBy: currentUserName,
+      role: currentUserRole,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("✅ Feedback submitted!");
+    document.getElementById("editableFeedbackForm").reset();
+  } catch (error) {
+    alert("❌ Error: " + error.message);
+  }
+}
+
+// Load feedback for a Member (read-only)
+async function loadMemberFeedback(memberEmail) {
+  const container = document.getElementById("feedbackList");
+  if (!container) return;
+  container.innerHTML = "Loading feedback...";
+
+  try {
+    const snapshot = await db.collection("feedback")
+      .where("member", "==", memberEmail.toLowerCase()) // normalize email
+      .orderBy("timestamp", "desc")
+      .get();
+
+    if (snapshot.empty) {
+      container.innerHTML = "<p>No feedback yet.</p>";
+      return;
+    }
+
+    let html = "";
+    snapshot.forEach(doc => {
+      const fb = doc.data();
+      html += `
+        <div style="background:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:10px;">
+          <strong>${fb.role} (${fb.submittedBy})</strong><br>
+          <em>${fb.type}</em><br>
+          Rating: ${fb.rating} ⭐<br>
+          ${fb.comments}<br>
+          <small>${fb.timestamp?.toDate().toLocaleString() || ""}</small>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  } catch (error) {
+    console.error("Error loading feedback:", error);
+    container.innerHTML = `<p style="color:red;">Error loading feedback: ${error.message}</p>`;
+  }
+}
+
+// Show proper UI based on role
+function setupFeedbackModule(role) {
+  const form = document.getElementById("editableFeedbackForm");
+  const readonly = document.getElementById("readonlyFeedback");
+
+  if (role.toLowerCase() === "member") {
+    if (form) form.style.display = "none";
+    if (readonly) readonly.style.display = "block";
+    loadMemberFeedback(currentUserName.toLowerCase()); // ensure email matches Firestore
+  } else {
+    if (form) form.style.display = "block";
+    if (readonly) readonly.style.display = "none";
+  }
+}
+
+
+
+  </script>
+
+
+
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore-compat.js"></script> <!-- ✅ ADD THIS -->
+
+<script>
+  // 🔧 Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAlG-Hpd_2VS_6lrmHGBmWihUTmgnCQPdE",
+    authDomain: "audit-tool-72987.firebaseapp.com",
+    projectId: "audit-tool-72987",
+    appId: "1:489308373004:web:230ac6910a27dcb920ee29"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  // Auth and Firestore references
+  const auth = firebase.auth();
+  const db = firebase.firestore(); // ✅ Now it works because Firestore script is loaded
+
+
+
+// Role map
+const emailRoleMap = {
+  "prathi@gmail.com": "Lead",
+  "guru@gmail.com": "Member",
+  "gopi@gmail.com": "Manager"
+};
+
+let currentUserName = "";
+let currentUserRole = "";
+
+const monthSelect = document.getElementById("monthSelect");
+const projectSelect = document.getElementById("projectSelect");
+const memberSelect = document.getElementById("qaMemberSelect");
+
+const inputs = {
+  executed: document.getElementById("executed"),
+  written: document.getElementById("written"),
+  updated: document.getElementById("updated"),
+  bugsFound: document.getElementById("bugsFound"),
+  bugsRetested: document.getElementById("bugsRetested")
+};
+
+// ===== Role-based UI =====
+function applyRoleRestrictions() {
+  if (currentUserRole === "Member") {
+   // projectSelect.value = "CRM Tool";
+   // memberSelect.value = "guru";
+    projectSelect.disabled = true;
+    memberSelect.disabled = true;
+    Object.values(inputs).forEach(i => i.disabled = false);
+    document.getElementById("submitQaLogs").style.display = "inline-block";
+  } else {
+    projectSelect.disabled = false;
+    memberSelect.disabled = false;
+    monthSelect.disabled = false;
+    Object.values(inputs).forEach(i => i.disabled = true);
+    document.getElementById("submitQaLogs").style.display = "none";
+  }
+}
+
+function setDefaultQASelects() {
+  if (currentUserRole !== "Member") {
+    if (!monthSelect.value) monthSelect.value = monthSelect.options[0]?.value || "";
+    if (!projectSelect.value) projectSelect.value = projectSelect.options[0]?.value || "";
+    if (!memberSelect.value) memberSelect.value = memberSelect.options[0]?.value || "";
+
+    loadQaLogs(); // ✅ Load logs for default selection
+  }
+}
+
+
+
+async function loadQaLogs() {
+  const month = monthSelect.value;
+  const project = projectSelect.value;
+  const qaMember = memberSelect.value;
+
+  if (!month || !project || !qaMember) return;
+
+  try {
+    const snapshot = await db.collection("qalog")
+      .where("month", "==", month)
+      .where("project", "==", project)
+      .where("qaMember", "==", qaMember)
+      .get(); // don't orderBy if not indexed
+
+    if (!snapshot.empty) {
+      const data = snapshot.docs[snapshot.docs.length - 1].data(); // get latest
+      Object.keys(inputs).forEach(key => inputs[key].value = data[key] || "");
+    } else {
+      Object.values(inputs).forEach(i => i.value = "");
+      console.log("No logs found for this selection.");
+    }
+  } catch (err) {
+    console.error("Error loading QA logs:", err);
+  }
+}
+
+
+// ===== Submit QA logs (Member only) =====
+document.getElementById("submitQaLogs").addEventListener("click", async () => {
+  if (currentUserRole !== "Member") return;
+
+  try {
+    await db.collection("qalog").add({
+      month: monthSelect.value,
+      project: projectSelect.value,
+      qaMember: memberSelect.value,
+      executed: Number(inputs.executed.value || 0),
+      written: Number(inputs.written.value || 0),
+      updated: Number(inputs.updated.value || 0),
+      bugsFound: Number(inputs.bugsFound.value || 0),
+      bugsRetested: Number(inputs.bugsRetested.value || 0),
+      submittedBy: currentUserName,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("✅ QA logs submitted successfully!");
+    Object.values(inputs).forEach(i => i.value = "");
+  } catch (err) {
+    console.error("Error submitting QA logs:", err);
+    alert("❌ Failed to submit QA logs.");
+  }
+});
+
+// ===== Dropdown change triggers =====
+[projectSelect, memberSelect, monthSelect].forEach(sel => {
+  sel.addEventListener("change", () => {
+    // Always load QA logs if role is not Member
+    if (currentUserRole !== "Member") {
+      // Only load if all dropdowns have a value
+      if (monthSelect.value && projectSelect.value && memberSelect.value) {
+        loadQaLogs();
+      }
+    }
+  });
+});
+
+
+
+  let userRole = "Manager"; // default for demo
+
+const tbody = document.querySelector("#auditTable tbody");
+const saveBtn = document.getElementById("saveScoresBtn");
+
+const phases = [
+  "Requirement Phase", "Test Plan and Estimation", "Test Case Design", "Test Execution",
+  "Defect Reporting", "Test Metrics", "Status Reporting", "Team Training",
+  "Roles, Responsibilities & Feedbacks", "Meetings", "Test Closure", "Project Closure", "Others"
+];
+
+function loadAuditTable() {
+  const tbody = document.querySelector("#auditTable tbody");
+  tbody.innerHTML = "";
+
+  phases.forEach(phase => {
+    let targetCell, achievedCell;
+
+    if (userRole === "Manager") {
+      targetCell = `<input type="number" min="0" max="100" class="target-input" style="width:60px;">`;
+      achievedCell = `<input type="number" min="0" max="100" class="achieved-input" style="width:60px;">`;
+    } else if (userRole === "Lead") {
+      // Disabled inputs for Lead (read-only but same UI)
+      targetCell = `<input type="number" min="0" max="100" class="target-input" style="width:60px;" readonly onkeydown="return false" onwheel="this.blur()">`;
+  achievedCell = `<input type="number" min="0" max="100" class="achieved-input" style="width:60px;" readonly onkeydown="return false" onwheel="this.blur()">`;
+    } else {
+      // For others: just spans
+      targetCell = `<span class="target-static">0%</span>`;
+      achievedCell = `<span class="achieved-static">0%</span>`;
+    }
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${phase}</td>
+      <td>${targetCell}</td>
+      <td>${achievedCell}</td>
+      <td class="variance">0%</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  if (userRole === "Manager") {
+    saveBtn.style.display = "inline-block";
+  } else {
+    saveBtn.style.display = "none";
+  }
+
+  calculateVariance();
+}
+document.getElementById("projectSelect").addEventListener("change", () => {
+  if (userRole === "Lead") {
+    const project = document.getElementById("projectSelect").value;
+    const member = document.getElementById("memberSelect").value;
+    if (project && member) {
+      loadLatestAuditScores(project, member);
+    }
+  }
+});
+
+document.getElementById("memberSelect").addEventListener("change", () => {
+  if (userRole === "Lead") {
+    const project = document.getElementById("projectSelect").value;
+    const member = document.getElementById("memberSelect").value;
+    if (project && member) {
+      loadLatestAuditScores(project, member);
+    }
+  }
+});
+
+
+function setupSelectsBasedOnRole(role) {
+  const projectSelect = document.getElementById("projectSelect");
+  const memberSelect = document.getElementById("memberSelect");
+
+  console.log("setupSelectsBasedOnRole called with role:", role);
+  console.log("projectSelect:", projectSelect);
+  console.log("memberSelect:", memberSelect);
+
+  if (!projectSelect || !memberSelect) {
+    console.error("Select elements not found!");
+    return;
+  }
+
+  if (role === "Member") {
+    //projectSelect.value = "CRM Tool";
+    //memberSelect.value = "guru";
+
+    projectSelect.disabled = true;
+    memberSelect.disabled = true;
+    console.log("Selects disabled for Member");
+  } else {
+    projectSelect.disabled = false;
+    memberSelect.disabled = false;
+    console.log("Selects enabled for role:", role);
+  }
+}
+
+
+async function loadLatestAuditScores(project, member) {
+  const snapshot = await db.collection("auditScores")
+    .where("project", "==", project)
+    .where("member", "==", member)
+    .orderBy("timestamp", "desc")
+    .limit(1)
+    .get();
+
+  if (!snapshot.empty) {
+    const data = snapshot.docs[0].data();
+    populateAuditTableForLead(data.scores);
+  } else {
+    populateAuditTableForLead(null);
+  }
+}
+
+function populateAuditTableForLead(scores) {
+  const tbody = document.querySelector("#auditTable tbody");
+  tbody.innerHTML = "";
+
+  phases.forEach(phase => {
+    const scoreObj = scores ? scores.find(s => s.phase === phase) : null;
+    const target = scoreObj ? scoreObj.target : 0;
+    const achieved = scoreObj ? scoreObj.achieved : 0;
+    const variance = achieved - target;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${phase}</td>
+      <td><span>${target}%</span></td>
+      <td><span>${achieved}%</span></td>
+      <td style="color:${variance >= 0 ? 'green' : 'red'};">
+        ${variance >= 0 ? "+" : ""}${variance}%
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Update totals
+  if (scores && scores.length > 0) {
+    const totalTarget = (scores.reduce((sum, s) => sum + s.target, 0) / scores.length).toFixed(1);
+    const totalAchieved = (scores.reduce((sum, s) => sum + s.achieved, 0) / scores.length).toFixed(1);
+    const totalVariance = (totalAchieved - totalTarget).toFixed(1);
+
+    document.getElementById("totalTarget").textContent = `${totalTarget}%`;
+    document.getElementById("totalAchieved").textContent = `${totalAchieved}%`;
+    const totalVarEl = document.getElementById("totalVariance");
+    totalVarEl.textContent = `${totalVariance >= 0 ? "+" : ""}${totalVariance}%`;
+    totalVarEl.style.color = totalVariance >= 0 ? "green" : "red";
+  } else {
+    document.getElementById("totalTarget").textContent = "0%";
+    document.getElementById("totalAchieved").textContent = "0%";
+    document.getElementById("totalVariance").textContent = "0%";
+  }
+}
+
+
+
+  
+  function calculateVariance() {
+    let totalTarget = 0, totalAchieved = 0, rowCount = 0;
+
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const targetInput = tr.querySelector(".target-input");
+      const achievedInput = tr.querySelector(".achieved-input");
+
+      const target = targetInput ? parseFloat(targetInput.value || 0) : 0;
+      const achieved = achievedInput ? parseFloat(achievedInput.value || 0) : 0;
+
+      const variance = achieved - target;
+      const varianceCell = tr.querySelector(".variance");
+      varianceCell.textContent = `${variance >= 0 ? "+" : ""}${variance}%`;
+      varianceCell.style.color = variance >= 0 ? "green" : "red";
+
+      totalTarget += target;
+      totalAchieved += achieved;
+      rowCount++;
+    });
+
+    const avgTarget = (totalTarget / rowCount).toFixed(1);
+    const avgAchieved = (totalAchieved / rowCount).toFixed(1);
+    const totalVariance = (avgAchieved - avgTarget).toFixed(1);
+
+    document.getElementById("totalTarget").textContent = `${avgTarget}%`;
+    document.getElementById("totalAchieved").textContent = `${avgAchieved}%`;
+    const totalVarEl = document.getElementById("totalVariance");
+    totalVarEl.textContent = `${totalVariance >= 0 ? "+" : ""}${totalVariance}%`;
+    totalVarEl.style.color = totalVariance >= 0 ? "green" : "red";
+  }
+  tbody.addEventListener("input", e => {
+    if (e.target.classList.contains("target-input") || e.target.classList.contains("achieved-input")) {
+      calculateVariance();
+    }
+  });
+  saveBtn.addEventListener("click", async () => {
+    const project = document.getElementById("projectSelect").value;
+    const member = document.getElementById("memberSelect").value;
+
+    if (!project) {
+      alert("Please select a Project.");
+      return;
+    }
+    if (!member) {
+      alert("Please select a Member.");
+      return;
+    }
+    let scores = [];
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const phase = tr.querySelector("td").textContent.trim();
+      const targetInput = tr.querySelector(".target-input");
+      const achievedInput = tr.querySelector(".achieved-input");
+      const target = targetInput ? parseFloat(targetInput.value || 0) : 0;
+      const achieved = achievedInput ? parseFloat(achievedInput.value || 0) : 0;
+      scores.push({ phase, target, achieved });
+    });
+
+    try {
+      await db.collection("auditScores").add({
+        project,
+        member,
+        scores,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert("✅ Audit scores saved successfully!");
+    } catch (error) {
+      console.error("Error saving audit scores:", error);
+      alert("❌ Error saving audit scores: " + error.message);
+    }
+  });
+   // Initial load
+   loadAuditTable();
+
+
+// Handle Add User form submit
+document.getElementById("addUserForm").addEventListener("submit", async (e) => {
+  e.preventDefault(); // Stop normal form submit
+
+  const name = document.getElementById("newUserName").value.trim();
+  const email = document.getElementById("newUserEmail").value.trim();
+  const role = document.getElementById("newUserRole").value;
+
+  try {
+    // Save to Firestore
+    await db.collection("users").add({
+      name: name,
+      email: email,
+      role: role
+    });
+
+    alert("✅ User added successfully! Ask them to register using this email.");
+    closeAddUserModal(); // Hide modal after save
+    document.getElementById("addUserForm").reset(); // Clear form
+    //loadUsers(); // Refresh user list
+  } catch (error) {
+    alert("❌ Error adding user: " + error.message);
+  }
+});
+
+
+async function loadUsers() {
+  const tbody = document.querySelector("#users tbody");
+  tbody.innerHTML = "";
+
+  const snapshot = await db.collection("users").get();
+  snapshot.forEach(doc => {
+    const user = doc.data();
+
+    // Create row
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${user.name}</td>
+      <td>${user.email}</td>
+      <td>${user.role}</td>
+      <td>
+        <button class="delete-btn">Delete</button>
+      </td>
+    `;
+
+    // Attach event listeners
+  
+
+    tr.querySelector(".delete-btn").addEventListener("click", () => {
+      deleteUser(doc.id);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+async function deleteUser(docId) {
+  if (!confirm("Are you sure you want to delete this user?")) return;
+
+  try {
+    await db.collection("users").doc(docId).delete();
+    alert("✅ User deleted successfully.");
+    loadUsers(); // Refresh the table
+  } catch (error) {
+    alert("❌ Error deleting user: " + error.message);
+  }
+}
+
+// Helper: Update Dashboard Welcome Message
+function updateDashboardWelcome(role) {
+  const welcomeEl = document.getElementById("welcomeMessage");
+  if (!welcomeEl) return;
+  if (role === "Member") {
+    welcomeEl.textContent = "Welcome to your Audit Pro dashboard";
+  } else if (role === "Lead") {
+    welcomeEl.textContent = "Welcome! Fresh data and updates are available.";
+  } else if (role === "Manager") {
+    welcomeEl.textContent = "Welcome back, Ready to start your next audit?";
+  } else {
+    welcomeEl.textContent = "";
+  }
+}
+
+// ===== Updated Login =====
+async function login() { 
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    const userCred = await auth.signInWithEmailAndPassword(email, password);
+    alert("Login successful!");
+
+    // Show UI
+    document.getElementById("loginContainer").style.display = "none";
+    document.querySelector(".sidebar").style.display = "flex";
+    document.querySelector(".main").style.display = "block";
+
+    // Set username
+    document.getElementById("userName").textContent = userCred.user.email;
+
+    // Always start on Dashboard
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('dashboard').classList.add('active');
+    document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+    const dashboardLink = document.querySelector('.nav-link[onclick*="dashboard"]');
+    if (dashboardLink) dashboardLink.classList.add('active');
+
+    // Get role from Firestore
+    const snapshot = await db.collection("users")
+      .where("email", "==", userCred.user.email)
+      .get();
+
+    if (!snapshot.empty) {
+      const role = snapshot.docs[0].data().role;
+      document.getElementById("userRole").textContent = role;
+      changeRole(role);
+      updateDashboardWelcome(role); // <-- NEW: Set welcome message based on role
+    }
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// Hide everything initially
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loginContainer").style.display = "none";
+  document.querySelector(".sidebar").style.display = "none";
+  document.querySelector(".main").style.display = "none";
+});
+
+/*
+
+ 
+auth.onAuthStateChanged(async user => { 
+  if (!user) {
+    // Hide main UI
+    document.getElementById("loginContainer").style.display = "block";
+    document.querySelector(".sidebar").style.display = "none";
+    document.querySelector(".main").style.display = "none";
+    return;
+  }
+
+  // Set global username and role
+  currentUserName = user.email;
+  currentUserRole = emailRoleMap[user.email.toLowerCase()] || "Member";
+
+  // Show main UI
+  document.getElementById("loginContainer").style.display = "none";
+  document.querySelector(".sidebar").style.display = "flex";
+  document.querySelector(".main").style.display = "block";
+  document.getElementById("userName").textContent = user.email;
+
+  // Default to dashboard
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('dashboard').classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  const dashboardLink = document.querySelector('.nav-link[onclick*="dashboard"]');
+  if (dashboardLink) dashboardLink.classList.add('active');
+
+  // Fetch role from Firestore
+  const snapshot = await db.collection("users")
+    .where("email", "==", user.email)
+    .get();
+
+  if (!snapshot.empty) {
+    currentUserRole = snapshot.docs[0].data().role;
+    document.getElementById("userRole").textContent = currentUserRole;
+
+    if (currentUserRole === "Manager") {
+      loadUsers(); // Load all users for Manager
+    }
+  }
+
+  // ===== QA Logs setup =====
+  const projectSelect = document.getElementById("projectSelect");
+  const memberSelect = document.getElementById("qaMemberSelect");
+  const monthSelect = document.getElementById("monthSelect");
+
+  if (currentUserRole === "Member") {
+    // Member: fixed project & member
+    projectSelect.value = "CRM Tool";
+    projectSelect.disabled = true; // fixed project
+    memberSelect.value = "guru";
+    memberSelect.disabled = true;  // cannot change name
+
+    // Inputs editable & submit button visible
+    document.querySelectorAll("#logs input").forEach(input => input.disabled = false);
+    document.getElementById("submitQaLogs").style.display = "inline-block";
+  } else {
+    // Manager/Lead: selects enabled, inputs read-only, submit hidden
+    projectSelect.disabled = false;
+    memberSelect.disabled = false;
+    document.querySelectorAll("#logs input").forEach(input => input.disabled = true);
+    document.getElementById("submitQaLogs").style.display = "none";
+
+    // Load latest logs for default selection
+    loadQaLogs();
+  }
+
+  // Reapply general restrictions (if any)
+  applyRoleRestrictions();
+
+  // Apply other modules
+  setupSelectsBasedOnRole(currentUserRole);
+  updateDashboardCards(currentUserRole);
+  updateDashboardWelcome(currentUserRole);
+  setupFeedbackModule(currentUserRole);
+});
+*/
+
+
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    document.getElementById("loginContainer").style.display = "block";
+    document.querySelector(".sidebar").style.display = "none";
+    document.querySelector(".main").style.display = "none";
+    return;
+  }
+
+  currentUserName = user.email;
+
+  // Show main UI
+  document.getElementById("loginContainer").style.display = "none";
+  document.querySelector(".sidebar").style.display = "flex";
+  document.querySelector(".main").style.display = "block";
+  document.getElementById("userName").textContent = currentUserName;
+
+  // Default to Dashboard
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('dashboard').classList.add('active');
+
+  // Fetch user document from Firestore
+  const snapshot = await db.collection("users")
+    .where("email", "==", currentUserName)
+    .get();
+
+  if (!snapshot.empty) {
+    const userData = snapshot.docs[0].data();
+
+    currentUserRole = userData.role;
+    document.getElementById("userRole").textContent = currentUserRole;
+
+    // ✅ Assign project & member dynamically for Members
+    if (currentUserRole === "Member") {
+      if (userData.project) {
+        projectSelect.value = userData.project;
+        projectSelect.disabled = true;
+      }
+      if (userData.name) {
+        memberSelect.value = userData.name;
+        memberSelect.disabled = true;
+      }
+    }
+
+    if (currentUserRole === "Manager") {
+      loadUsers();
+    }
+  } else {
+    // fallback if user doc not found
+    currentUserRole = emailRoleMap[user.email.toLowerCase()] || "Member";
+    document.getElementById("userRole").textContent = currentUserRole;
+  }
+
+  // ----- Apply modules -----
+  changeRole(currentUserRole);   // hide/show correct modules
+  applyRoleRestrictions(); 
+  setDefaultQASelects();
+  setupFeedbackModule(currentUserRole);
+  updateDashboardCards(currentUserRole);
+  updateDashboardWelcome(currentUserRole);
+
+  // Load QA logs for Manager/Lead
+  if (
+    currentUserRole !== "Member" &&
+    monthSelect && projectSelect && memberSelect &&
+    monthSelect.value && projectSelect.value && memberSelect.value
+  ) {
+    loadQaLogs();
+  }
+});
+
+
+</script>
+
+
+</body>
+</html>
