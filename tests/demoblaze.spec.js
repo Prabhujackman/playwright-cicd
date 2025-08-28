@@ -41,6 +41,7 @@ await expect(page.locator("//h2[normalize-space()='Samsung galaxy s6']")).toHave
   await page.getByRole('textbox', { name: 'Month:' }).fill('August');
   await page.getByRole('textbox', { name: 'Year:' }).fill('2025');
   await page.getByRole('button', { name: 'Purchase' }).click();
+  console.log("test is completed");
 
   // Verify purchase success
   await expect(page.getByRole('heading', { name: 'Thank you for your purchase!' })).toBeVisible(); // ✅ Assert success message
