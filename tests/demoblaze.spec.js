@@ -24,11 +24,12 @@ await expect(page.locator("//h2[normalize-space()='Samsung galaxy s6']")).toHave
   page.once('dialog', dialog => dialog.accept().catch(() => {})); // Handle alert
   await page.getByRole('link', { name: 'Add to cart' }).click();
   await page.getByRole('link', { name: 'Cart', exact: true }).click();
-  
+  console.log("Add to cart is clicked");
 
   // Place order
   await page.getByRole('button', { name: 'Place Order' }).click();
   await expect(page.getByRole('heading', { name: 'Place order' })).toHaveText('Place order');
+  console.log("Place order dialog is opened");
 
 
   // Fill order details
@@ -41,9 +42,10 @@ await expect(page.locator("//h2[normalize-space()='Samsung galaxy s6']")).toHave
   await page.getByRole('textbox', { name: 'Month:' }).fill('August');
   await page.getByRole('textbox', { name: 'Year:' }).fill('2025');
   await page.getByRole('button', { name: 'Purchase' }).click();
-  console.log("test is completed");
+
 
   // Verify purchase success
   await expect(page.getByRole('heading', { name: 'Thank you for your purchase!' })).toBeVisible(); // ✅ Assert success message
   await page.getByRole('button', { name: 'OK' }).click();
+  console.log("Purchase success");
 });
