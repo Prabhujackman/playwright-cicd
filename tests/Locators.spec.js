@@ -10,6 +10,7 @@ test('Locators', async({page})=> {
 //    Click on login button
 
     await page.locator('id=login2').click()
+    console.log("test locator");
 
  //   await page.click('id=login2')    --> user can locate using this statement
 
